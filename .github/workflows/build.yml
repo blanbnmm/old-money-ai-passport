@@ -1,0 +1,75 @@
+name: Build Lao Qian AI firmware
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout official AI Passport SDK
+        uses: actions/checkout@v4
+        with:
+          repository: FoloToy/ai-passport
+          ref: main
+          path: sdk
+          submodules: recursive
+
+      - name: Apply Lao Qian AI patches
+        run: |
+          if [ -d patches/main ]; then
+            # 备份原始
+            cp sdk/main/CMakeLists.txt sdk/main/CMakeLists.txt.orig
+            cp sdk/main/main.c sdk/main/main.c.orig
+            # 应用补丁
+            cp patches/main/CMakeLists.txt sdk/main/CMakeLists.txt
+            cp patches/main/main.c sdk/main/main.c
+            cp patches/main/demo.h sdk/main/demo.h
+            cp patches/main/menu.h sdk/main/menu.h
+            cp patches/main/menu.c sdk/main/menu.c
+            cp patches/main/feature_quote.h sdk/main/feature_quote.h
+            cp patches/main/feature_quote.c sdk/main/feature_quote.c
+            cp patches/main/feature_diary.h sdk/main/feature_diary.h
+            cp patches/main/feature_diary.c sdk/main/feature_diary.c
+            cp patches/main/feature_greeting.h sdk/main/feature_greeting.h
+            cp patches/main/feature_greeting.c sdk/main/feature_greeting.c
+            cp patches/main/old_money_quotes.h sdk/main/old_money_quotes.h
+            cp patches/main/old_money_quotes.c sdk/main/old_money_quotes.c
+            cp patches/main/old_money_diary.h sdk/main/old_money_diary.h
+            cp patches/main/old_money_diary.c sdk/main/old_money_diary.c
+            cp patches/main/stock_monitor.h sdk/main/stock_monitor.h
+            cp patches/main/stock_monitor.c sdk/main/stock_monitor.c
+            echo "✓ 老钱 AI 14 个源码已应用"
+          else
+            echo "❌ patches/main 不存在"
+            exit 1
+          fi
+
+      - name: Install ESP-IDF v5.5.3
+        run: |
+          cd ${{ runner.temp }}
+          git clone --depth 1 -b v5.5.3 https://github.com/espressif/esp-idf.git
+          cd esp-idf
+          ./install.sh esp32c3
+          echo "IDF_PATH=${{ runner.temp }}/esp-idf" >> $GITHUB_ENV
+
+      - name: Build firmware
+        run: |
+          source $IDF_PATH/export.sh
+          cd sdk
+          idf.py set-target esp32c3
+          idf.py -B build
+          idf.py merge-bin -o build/FoloToy-AI-Passport-full.bin
+          echo "=== Build complete ==="
+          ls -lh build/FoloToy-AI-Passport-full.bin
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FoloToy-AI-Passport-full
+          path: sdk/build/FoloToy-AI-Passport-full.bin
+          retention-days: 7
