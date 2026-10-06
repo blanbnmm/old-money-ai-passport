@@ -1,13 +1,9 @@
 // main/feature_diary.c —— 老钱日记功能
 #include <esp_random.h>
 #include "feature_diary.h"
-#include <esp_random.h>
 #include "old_money_diary.h"
-#include <esp_random.h>
 #include "bsp_display.h"
-#include <esp_random.h>
 #include "ui_pixel.h"
-#include <esp_random.h>
 #include "lvgl.h"
 
 #include <stdio.h>
