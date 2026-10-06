@@ -67,6 +67,10 @@ jobs:
           echo "=== Build artifacts ==="
           find build -name "*.bin" 2>&1 | head -10
 
+      - name: Install esptool
+        run: |
+          python3 -m pip install --quiet esptool
+
       - name: Merge bins manually
         run: |
           cd src/sdk/build
