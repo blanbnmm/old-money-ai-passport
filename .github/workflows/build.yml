@@ -59,21 +59,43 @@ jobs:
           ./install.sh esp32c3
           echo "IDF_PATH=${{ runner.temp }}/esp-idf" >> $GITHUB_ENV
 
-      - name: Build firmware (skip merge-bin / flash)
+      - name: Build firmware (verbose - dump errors)
         run: |
           source $IDF_PATH/export.sh
           cd src/sdk
           idf.py set-target esp32c3
-          # 不跑 merge-bin/flash，只跑 build
-          idf.py -G "Unix Makefiles" app 2>/dev/null || idf.py build
-          echo "=== Build artifacts ==="
-          find build -name "*.bin" 2>&1 | head -10
+          # 跑 build 并把完整输出保存到 GITHUB_STEP_SUMMARY（失败时也能看到）
+          idf.py build > /tmp/build_output.log 2>&1
+          BUILD_EXIT=$?
+          echo "## Build exit code: $BUILD_EXIT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "### Build failed - tail of output:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -80 /tmp/build_output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            # 也上传 log 作为 artifact
+          fi
+          # 把 log 也上传作 artifact（无论成功失败）
+          mkdir -p /tmp/build_artifacts
+          cp /tmp/build_output.log /tmp/build_artifacts/build_log.txt 2>/dev/null
+          exit $BUILD_EXIT
+
+      - name: Upload build log (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: /tmp/build_artifacts/build_log.txt
+          retention-days: 1
 
       - name: Install esptool
+        if: success()
         run: |
           python3 -m pip install --quiet esptool
 
       - name: Merge bins manually
+        if: success()
         run: |
           cd src/sdk/build
           BOOT=$(find . -name 'bootloader.bin' | head -1)
@@ -95,7 +117,8 @@ jobs:
             0x10000 "$APP"
           ls -lh FoloToy-AI-Passport-full.bin
 
-      - name: Upload artifact
+      - name: Upload firmware artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: FoloToy-AI-Passport-full
