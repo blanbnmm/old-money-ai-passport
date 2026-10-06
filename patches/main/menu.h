@@ -11,7 +11,13 @@ enum {
     MENU_TOTAL
 };
 
+// 按键事件（用 bsp_button.h 的类型）
+typedef int bsp_btn_t;
+typedef int bsp_btn_ev_t;
+
+// 菜单项条目
 typedef struct {
+    const char *icon;
     const char *name;
     void (*enter)(void);
     void (*key)(int btn, int ev);
@@ -21,5 +27,5 @@ void menu_enter(void);
 void menu_exit(void);
 void menu_key(int btn, int ev);
 
-// 检查长按 OK（返回 1=长按了，0=没有）
+const feature_entry_t *menu_get_features(int *count);
 int menu_check_long_press_ok(int hold_ms);

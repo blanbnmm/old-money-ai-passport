@@ -1,27 +1,27 @@
-// main/menu.c —— 老钱 AI 主菜单
+// 老钱 AI 主菜单
+#include <stdio.h>
+#include <stddef.h>
 #include "menu.h"
 #include "bsp_display.h"
 #include "ui_pixel.h"
 #include "lvgl.h"
 
-#include <stdio.h>
+// 引入所有功能的入口
+extern void stock_monitor_enter(void);
+extern void stock_monitor_key(int btn, int ev);
+extern void feature_quote_enter(void);
+extern void feature_quote_key(int btn, int ev);
+extern void feature_diary_enter(void);
+extern void feature_diary_key(int btn, int ev);
+extern void feature_greeting_enter(void);
+extern void feature_greeting_key(int btn, int ev);
 
 typedef struct {
     const char *icon;
     const char *name;
     void (*enter)(void);
-    void (*key)(bsp_btn_t btn, bsp_btn_ev_t ev);
+    void (*key)(int btn, int ev);
 } entry_t;
-
-extern void feature_quote_enter(void);
-extern void feature_quote_key(bsp_btn_t btn, bsp_btn_ev_t ev);
-extern void feature_diary_enter(void);
-extern void feature_diary_key(bsp_btn_t btn, bsp_btn_ev_t ev);
-extern void feature_greeting_enter(void);
-extern void feature_greeting_key(bsp_btn_t btn, bsp_btn_ev_t ev);
-extern void stock_monitor_enter(void);
-extern void stock_monitor_key(bsp_btn_t btn, bsp_btn_ev_t ev);
-extern void stock_monitor_exit(void);
 
 static const entry_t FEATURES[] = {
     { "📈", "实时盯盘", stock_monitor_enter, stock_monitor_key },
@@ -32,107 +32,85 @@ static const entry_t FEATURES[] = {
 #define FEATURE_COUNT (sizeof(FEATURES) / sizeof(FEATURES[0]))
 
 static int s_selected = 0;
-static lv_obj_t *s_scr;
-static lv_obj_t *s_title;
-static lv_obj_t *s_item_icons[FEATURE_COUNT];
-static lv_obj_t *s_item_names[FEATURE_COUNT];
-static lv_obj_t *s_item_panels[FEATURE_COUNT];
-static lv_obj_t *s_hint;
+static lv_obj_t *s_scr = NULL;
+static lv_obj_t *s_item_icons[MENU_TOTAL];
+static lv_obj_t *s_item_names[MENU_TOTAL];
+static lv_obj_t *s_hint = NULL;
 
-extern void ui_pixel_set_selected(lv_obj_t *panel, bool selected, bool enabled);
-
-void menu_refresh(void) {
-    if (!bsp_lvgl_lock(250)) return;
-    for (int i = 0; i < FEATURE_COUNT; i++) {
-        bool sel = (i == s_selected);
-        ui_pixel_set_selected(s_item_panels[i], sel, true);
-    }
-    bsp_lvgl_unlock();
-}
-
-void menu_enter(void) {
-    s_scr = ui_pixel_screen_create("老钱 AI");
-
-    s_title = ui_pixel_label(s_scr, "老钱 AI", &lv_font_montserrat_14, UI_INK);
-    lv_obj_align(s_title, LV_ALIGN_TOP_LEFT, 12, 8);
-
-    for (int i = 0; i < FEATURE_COUNT; i++) {
-        int y = 38 + i * 60;
-        s_item_panels[i] = ui_pixel_panel_create(s_scr, 14, y, 212, 50, UI_PAPER);
-
-        s_item_icons[i] = lv_label_create(s_item_panels[i]);
-        lv_label_set_text(s_item_icons[i], FEATURES[i].icon);
-        lv_obj_set_style_text_font(s_item_icons[i], &lv_font_montserrat_20, 0);
-        lv_obj_align(s_item_icons[i], LV_ALIGN_LEFT_MID, 8, 0);
-
-        s_item_names[i] = lv_label_create(s_item_panels[i]);
-        lv_label_set_text(s_item_names[i], FEATURES[i].name);
-        lv_obj_set_style_text_font(s_item_names[i], &lv_font_montserrat_14, 0);
-        lv_obj_set_style_text_color(s_item_names[i], lv_color_hex(UI_INK), 0);
-        lv_obj_align(s_item_names[i], LV_ALIGN_LEFT_MID, 50, 0);
-    }
-
-    s_hint = ui_pixel_label(s_scr, "OK 进入 | 长按 OK 问候", &lv_font_montserrat_14, UI_SKY_DARK);
-    lv_obj_align(s_hint, LV_ALIGN_BOTTOM_LEFT, 12, -10);
-
-    lv_screen_load(s_scr);
-    menu_refresh();
-}
-
-void menu_exit(void) {
-    if (s_scr) { lv_obj_delete(s_scr); s_scr = NULL; }
-    s_title = s_hint = NULL;
-    for (int i = 0; i < FEATURE_COUNT; i++) {
-        s_item_icons[i] = s_item_names[i] = s_item_panels[i] = NULL;
-    }
-}
-
-void menu_key(bsp_btn_t btn, bsp_btn_ev_t ev) {
-    if (ev != BSP_BTN_CLICK && ev != BSP_BTN_LONG) return;
-
-    if (btn == BSP_BTN_OK && ev == BSP_BTN_LONG) {
-        menu_exit();
-        feature_greeting_enter();
-        return;
-    }
-
-    if (!bsp_lvgl_lock(250)) return;
-
-    if (btn == BSP_BTN_UP && ev == BSP_BTN_CLICK) {
-        s_selected = (s_selected - 1 + FEATURE_COUNT) % FEATURE_COUNT;
-    } else if (btn == BSP_BTN_DOWN && ev == BSP_BTN_CLICK) {
-        s_selected = (s_selected + 1) % FEATURE_COUNT;
-    } else if (btn == BSP_BTN_OK && ev == BSP_BTN_CLICK) {
-        int sel = s_selected;
-        bsp_lvgl_unlock();
-        menu_exit();
-        FEATURES[sel].enter();
-        return;
-    } else {
-        bsp_lvgl_unlock();
-        return;
-    }
-
-    menu_refresh();
-    bsp_lvgl_unlock();
+const feature_entry_t *menu_get_features(int *count) {
+    if (count) *count = FEATURE_COUNT;
+    return (const feature_entry_t *)FEATURES;
 }
 
 int menu_check_long_press_ok(int hold_ms) {
-    return false;
+    (void)hold_ms;
+    return 0;
 }
 
-const feature_entry_t *menu_get_features(int *count) {
-    static feature_entry_t fe[FEATURE_COUNT];
+static void draw(void) {
+    s_scr = ui_pixel_screen_create("老钱 AI");
     for (int i = 0; i < FEATURE_COUNT; i++) {
-        fe[i].name = FEATURES[i].name;
-        fe[i].enter = NULL;
-        fe[i].exit = NULL;
-        fe[i].key = NULL;
+        int y = 40 + i * 60;
+        if (i == s_selected) {
+            lv_obj_t *bg = lv_obj_create(s_scr);
+            lv_obj_set_size(bg, 220, 50);
+            lv_obj_set_pos(bg, 10, y);
+            lv_obj_set_style_bg_color(bg, lv_color_hex(0x1689E8), 0);
+            lv_obj_set_style_bg_opa(bg, LV_OPA_COVER, 0);
+            lv_obj_set_style_radius(bg, 8, 0);
+        }
+        s_item_icons[i] = lv_label_create(s_scr);
+        lv_label_set_text(s_item_icons[i], FEATURES[i].icon);
+        lv_obj_set_style_text_font(s_item_icons[i], &lv_font_montserrat_20, 0);
+        lv_obj_set_pos(s_item_icons[i], 20, y + 12);
+        lv_obj_set_style_text_color(s_item_icons[i],
+            lv_color_hex(i == s_selected ? 0xF4F4EA : 0x17202A), 0);
+
+        s_item_names[i] = lv_label_create(s_scr);
+        lv_label_set_text(s_item_names[i], FEATURES[i].name);
+        lv_obj_set_style_text_font(s_item_names[i], &lv_font_montserrat_14, 0);
+        lv_obj_set_pos(s_item_names[i], 60, y + 16);
+        lv_obj_set_style_text_color(s_item_names[i],
+            lv_color_hex(i == s_selected ? 0xF4F4EA : 0x17202A), 0);
     }
-    if (count) *count = FEATURE_COUNT;
-    return fe;
+    s_hint = lv_label_create(s_scr);
+    lv_label_set_text(s_hint, "OK: enter  UP/DOWN: nav");
+    lv_obj_set_style_text_font(s_hint, &lv_font_montserrat_14, 0);
+    lv_obj_set_pos(s_hint, 8, 304);
+    lv_obj_set_style_text_color(s_hint, lv_color_hex(0x0872C9), 0);
 }
 
-void menu_register_features(void) {
-    // no-op
+void menu_enter(void) {
+    s_selected = 0;
+    if (!bsp_lvgl_lock(500)) return;
+    draw();
+    bsp_lvgl_unlock();
+}
+
+void menu_exit(void) {
+    if (!bsp_lvgl_lock(500)) return;
+    if (s_scr) {
+        lv_obj_del(s_scr);
+        s_scr = NULL;
+    }
+    bsp_lvgl_unlock();
+}
+
+void menu_key(int btn, int ev) {
+    (void)ev;
+    if (!bsp_lvgl_lock(250)) return;
+    if (btn == 1) {  // UP
+        s_selected = (s_selected + FEATURE_COUNT - 1) % FEATURE_COUNT;
+        draw();
+    } else if (btn == 2) {  // DOWN
+        s_selected = (s_selected + 1) % FEATURE_COUNT;
+        draw();
+    } else if (btn == 3) {  // OK
+        if (s_scr) {
+            lv_obj_del(s_scr);
+            s_scr = NULL;
+        }
+        FEATURES[s_selected].enter();
+    }
+    bsp_lvgl_unlock();
 }
