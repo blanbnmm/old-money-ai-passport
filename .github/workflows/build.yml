@@ -11,41 +11,43 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout official AI Passport SDK
+      # 先 checkout 当前仓库（带 patches/main 目录）
+      - name: Checkout this repo (with patches)
         uses: actions/checkout@v4
         with:
-          repository: FoloToy/ai-passport
-          ref: main
-          path: sdk
-          submodules: recursive
+          path: src
 
+      # 把 sdk 目录放到 src 下，不影响 patches
+      - name: Clone official AI Passport SDK into src/sdk
+        run: |
+          cd src
+          git clone --depth 1 --recursive --shallow-submodules https://github.com/FoloToy/ai-passport.git sdk
+
+      # 应用老钱 AI 源码补丁
       - name: Apply Lao Qian AI patches
         run: |
-          if [ -d patches/main ]; then
-            # 备份原始
-            cp sdk/main/CMakeLists.txt sdk/main/CMakeLists.txt.orig
-            cp sdk/main/main.c sdk/main/main.c.orig
-            # 应用补丁
-            cp patches/main/CMakeLists.txt sdk/main/CMakeLists.txt
-            cp patches/main/main.c sdk/main/main.c
-            cp patches/main/demo.h sdk/main/demo.h
-            cp patches/main/menu.h sdk/main/menu.h
-            cp patches/main/menu.c sdk/main/menu.c
-            cp patches/main/feature_quote.h sdk/main/feature_quote.h
-            cp patches/main/feature_quote.c sdk/main/feature_quote.c
-            cp patches/main/feature_diary.h sdk/main/feature_diary.h
-            cp patches/main/feature_diary.c sdk/main/feature_diary.c
-            cp patches/main/feature_greeting.h sdk/main/feature_greeting.h
-            cp patches/main/feature_greeting.c sdk/main/feature_greeting.c
-            cp patches/main/old_money_quotes.h sdk/main/old_money_quotes.h
-            cp patches/main/old_money_quotes.c sdk/main/old_money_quotes.c
-            cp patches/main/old_money_diary.h sdk/main/old_money_diary.h
-            cp patches/main/old_money_diary.c sdk/main/old_money_diary.c
-            cp patches/main/stock_monitor.h sdk/main/stock_monitor.h
-            cp patches/main/stock_monitor.c sdk/main/stock_monitor.c
-            echo "✓ 老钱 AI 14 个源码已应用"
+          if [ -d src/patches/main ]; then
+            cp src/patches/main/CMakeLists.txt src/sdk/main/CMakeLists.txt
+            cp src/patches/main/main.c src/sdk/main/main.c
+            cp src/patches/main/demo.h src/sdk/main/demo.h
+            cp src/patches/main/menu.h src/sdk/main/menu.h
+            cp src/patches/main/menu.c src/sdk/main/menu.c
+            cp src/patches/main/feature_quote.h src/sdk/main/feature_quote.h
+            cp src/patches/main/feature_quote.c src/sdk/main/feature_quote.c
+            cp src/patches/main/feature_diary.h src/sdk/main/feature_diary.h
+            cp src/patches/main/feature_diary.c src/sdk/main/feature_diary.c
+            cp src/patches/main/feature_greeting.h src/sdk/main/feature_greeting.h
+            cp src/patches/main/feature_greeting.c src/sdk/main/feature_greeting.c
+            cp src/patches/main/old_money_quotes.h src/sdk/main/old_money_quotes.h
+            cp src/patches/main/old_money_quotes.c src/sdk/main/old_money_quotes.c
+            cp src/patches/main/old_money_diary.h src/sdk/main/old_money_diary.h
+            cp src/patches/main/old_money_diary.c src/sdk/main/old_money_diary.c
+            cp src/patches/main/stock_monitor.h src/sdk/main/stock_monitor.h
+            cp src/patches/main/stock_monitor.c src/sdk/main/stock_monitor.c
+            echo "✓ 老钱 AI 14 源码已应用"
           else
-            echo "❌ patches/main 不存在"
+            echo "❌ src/patches/main 不存在"
+            ls -la src/ 2>&1
             exit 1
           fi
 
@@ -60,7 +62,7 @@ jobs:
       - name: Build firmware
         run: |
           source $IDF_PATH/export.sh
-          cd sdk
+          cd src/sdk
           idf.py set-target esp32c3
           idf.py -B build
           idf.py merge-bin -o build/FoloToy-AI-Passport-full.bin
@@ -71,5 +73,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: FoloToy-AI-Passport-full
-          path: sdk/build/FoloToy-AI-Passport-full.bin
+          path: src/sdk/build/FoloToy-AI-Passport-full.bin
           retention-days: 7
