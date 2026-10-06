@@ -242,26 +242,26 @@ static void refresh_tick(lv_timer_t *t) {
 
 void stock_monitor_enter(void) {
     s_scr = ui_pixel_screen_create("STOCKS");
-    s_title = ui_pixel_label(s_scr, "STOCKS", &lv_font_montserrat_14, 0x17202A);
+    s_title = ui_pixel_label(s_scr, "STOCKS", &laoqian_font_16, 0x17202A);
     lv_obj_align(s_title, LV_ALIGN_TOP_LEFT, 12, 8);
     s_wifi_icon = lv_obj_create(s_scr);
     lv_obj_set_size(s_wifi_icon, 10, 10);
     lv_obj_set_style_radius(s_wifi_icon, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_color(s_wifi_icon, lv_color_hex(0xE43B2F), 0);
     lv_obj_align(s_wifi_icon, LV_ALIGN_TOP_RIGHT, -14, 12);
-    s_name_lbl = ui_pixel_label(s_scr, "...", &lv_font_montserrat_20, 0x17202A);
+    s_name_lbl = ui_pixel_label(s_scr, "...", &laoqian_font_20, 0x17202A);
     lv_obj_align(s_name_lbl, LV_ALIGN_TOP_LEFT, 16, 40);
-    s_code_lbl = ui_pixel_label(s_scr, "...", &lv_font_montserrat_14, 0x0872C9);
+    s_code_lbl = ui_pixel_label(s_scr, "...", &laoqian_font_16, 0x0872C9);
     lv_obj_align(s_code_lbl, LV_ALIGN_TOP_LEFT, 16, 70);
-    s_price_lbl = ui_pixel_label(s_scr, "--.--", &lv_font_montserrat_20, 0x17202A);
+    s_price_lbl = ui_pixel_label(s_scr, "--.--", &laoqian_font_20, 0x17202A);
     lv_obj_align(s_price_lbl, LV_ALIGN_CENTER, 0, -20);
-    s_change_lbl = ui_pixel_label(s_scr, "—", &lv_font_montserrat_20, 0xD9E7EC);
+    s_change_lbl = ui_pixel_label(s_scr, "—", &laoqian_font_20, 0xD9E7EC);
     lv_obj_align(s_change_lbl, LV_ALIGN_CENTER, 0, 30);
-    s_kline_lbl = ui_pixel_label(s_scr, "—", &lv_font_montserrat_14, 0x17202A);
+    s_kline_lbl = ui_pixel_label(s_scr, "—", &laoqian_font_16, 0x17202A);
     lv_obj_align(s_kline_lbl, LV_ALIGN_BOTTOM_LEFT, 16, -50);
-    s_update_lbl = ui_pixel_label(s_scr, "", &lv_font_montserrat_14, 0x0872C9);
+    s_update_lbl = ui_pixel_label(s_scr, "", &laoqian_font_16, 0x0872C9);
     lv_obj_align(s_update_lbl, LV_ALIGN_BOTTOM_LEFT, 16, -28);
-    s_status_lbl = ui_pixel_label(s_scr, "WiFi not connected", &lv_font_montserrat_14, 0xE43B2F);
+    s_status_lbl = ui_pixel_label(s_scr, "WiFi not connected", &laoqian_font_16, 0xE43B2F);
     lv_obj_align(s_status_lbl, LV_ALIGN_BOTTOM_LEFT, 16, -10);
     s_refresh_timer = lv_timer_create(refresh_tick, REFRESH_INTERVAL_MS, NULL);
     s_clock_timer = lv_timer_create((lv_timer_cb_t)update_ui, 1000, NULL);

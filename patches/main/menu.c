@@ -61,21 +61,21 @@ static void draw(void) {
         }
         s_item_icons[i] = lv_label_create(s_scr);
         lv_label_set_text(s_item_icons[i], FEATURES[i].icon);
-        lv_obj_set_style_text_font(s_item_icons[i], &lv_font_montserrat_20, 0);
+        lv_obj_set_style_text_font(s_item_icons[i], &laoqian_font_20, 0);
         lv_obj_set_pos(s_item_icons[i], 20, y + 12);
         lv_obj_set_style_text_color(s_item_icons[i],
             lv_color_hex(i == s_selected ? 0xF4F4EA : 0x17202A), 0);
 
         s_item_names[i] = lv_label_create(s_scr);
         lv_label_set_text(s_item_names[i], FEATURES[i].name);
-        lv_obj_set_style_text_font(s_item_names[i], &lv_font_montserrat_14, 0);
+        lv_obj_set_style_text_font(s_item_names[i], &laoqian_font_16, 0);
         lv_obj_set_pos(s_item_names[i], 60, y + 16);
         lv_obj_set_style_text_color(s_item_names[i],
             lv_color_hex(i == s_selected ? 0xF4F4EA : 0x17202A), 0);
     }
     s_hint = lv_label_create(s_scr);
     lv_label_set_text(s_hint, "OK: enter  UP/DOWN: nav");
-    lv_obj_set_style_text_font(s_hint, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(s_hint, &laoqian_font_16, 0);
     lv_obj_set_pos(s_hint, 8, 304);
     lv_obj_set_style_text_color(s_hint, lv_color_hex(0x0872C9), 0);
 }

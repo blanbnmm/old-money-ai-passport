@@ -16,3 +16,9 @@ idf_component_register(
     INCLUDE_DIRS "."
     REQUIRES bsp esp_event esp_lcd esp_hw_support esp_netif esp_timer esp_wifi nvs_flash
 )
+
+# 老钱 AI 中文 LVGL 字体子集（801 字 / 16px + 20px）
+target_sources(${COMPONENT_LIB} PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/../assets/fonts/laoqian_font_16.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../assets/fonts/laoqian_font_20.c"
+)

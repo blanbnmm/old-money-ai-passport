@@ -2,7 +2,7 @@ name: Build Lao Qian AI firmware
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/chinese-ui-redesign]
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,7 @@ jobs:
       - name: Apply Lao Qian AI patches
         run: |
           if [ -d src/patches/main ]; then
+            # 老钱 AI 14 源码
             cp src/patches/main/menu.h src/sdk/main/menu.h
             cp src/patches/main/menu.c src/sdk/main/menu.c
             cp src/patches/main/feature_quote.h src/sdk/main/feature_quote.h
@@ -41,9 +42,12 @@ jobs:
             cp src/patches/main/CMakeLists.txt src/sdk/main/CMakeLists.txt
             cp src/patches/main/main.c src/sdk/main/main.c
             cp src/patches/main/demo.h src/sdk/main/demo.h
-            # 不要追加 (替换) SDK 原 sdkconfig.defaults（会破坏 LVGL 配置导致雪花屏）
-            # 改为：保留 SDK 原文件，老钱 AI 配置只在源码里用硬编码（之前已改）
-            echo "✓ 老钱 AI 14 源码 + sdkconfig 已应用"
+            cp src/patches/main/laoqian_fonts.h src/sdk/main/laoqian_fonts.h
+            # 中文 LVGL 字体（801 字 / 16px + 20px）
+            mkdir -p src/sdk/assets/fonts
+            cp src/patches/assets/fonts/laoqian_font_16.c src/sdk/assets/fonts/laoqian_font_16.c
+            cp src/patches/assets/fonts/laoqian_font_20.c src/sdk/assets/fonts/laoqian_font_20.c
+            echo "✓ 老钱 AI 14 源码 + 2 中文字体 + sdkconfig 已应用"
           else
             echo "❌ src/patches/main 不存在"
             ls -la src/
@@ -58,13 +62,12 @@ jobs:
           ./install.sh esp32c3
           echo "IDF_PATH=${{ runner.temp }}/esp-idf" >> $GITHUB_ENV
 
-      - name: Build firmware (skip merge-bin / flash)
+      - name: Build firmware
         run: |
           source $IDF_PATH/export.sh
           cd src/sdk
           idf.py set-target esp32c3
-          # 不跑 merge-bin/flash，只跑 build
-          idf.py -G "Unix Makefiles" app 2>/dev/null || idf.py build
+          idf.py build
           echo "=== Build artifacts ==="
           find build -name "*.bin" 2>&1 | head -10
 
@@ -75,7 +78,6 @@ jobs:
       - name: Merge bins manually
         run: |
           cd src/sdk/build
-          # 找 bootloader / partition-table / app
           BOOT=$(find . -name 'bootloader.bin' | head -1)
           PART=$(find . -name 'partition-table.bin' | head -1)
           APP=$(find . -name '*.bin' ! -name 'bootloader.bin' ! -name 'partition-table.bin' | head -1)

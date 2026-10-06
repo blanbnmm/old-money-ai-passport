@@ -14,6 +14,7 @@
 #include "demo_navigation.h"
 #include "ui_pixel.h"
 #include "lvgl.h"
+#include "laoqian_fonts.h"
 #include "esp_log.h"
 #include "esp_sleep.h"
 #include "freertos/FreeRTOS.h"
