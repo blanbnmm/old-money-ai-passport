@@ -126,10 +126,16 @@ static esp_err_t fetch_one(const char *ticker, stock_quote_t *out) {
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 
+    // DNS 解析
+    struct hostent *he = gethostbyname(QT_HOST);
+    if (!he) {
+        close(sock);
+        return ESP_FAIL;
+    }
     struct sockaddr_in addr = {0};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(QT_PORT);
-    inet_pton(AF_INET, "101.227.97.40", &addr.sin_addr);  // qt.gtimg.cn 实际 IP
+    memcpy(&addr.sin_addr, he->h_addr, he->h_length);
 
     if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         close(sock);

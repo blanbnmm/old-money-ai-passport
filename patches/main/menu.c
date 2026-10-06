@@ -117,7 +117,7 @@ void menu_key(bsp_btn_t btn, bsp_btn_ev_t ev) {
     bsp_lvgl_unlock();
 }
 
-bool menu_check_long_press_ok(int hold_ms) {
+int menu_check_long_press_ok(int hold_ms) {
     return false;
 }
 

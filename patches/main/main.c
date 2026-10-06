@@ -27,9 +27,7 @@ static const demo_entry_t DEMOS[] = {
       .key = demo_display_key },
     { .name = "Button", .enter = demo_button_enter, .exit = demo_button_exit,
       .key = demo_button_key },
-    { .name = "Low Power", .enter = demo_low_power_enter, .exit = demo_low_power_exit,
-      .key = demo_low_power_key, .start = demo_low_power_start, .stop = demo_low_power_stop },
-    { .name = "老钱 AI", .enter = menu_enter, .exit = menu_exit,
+        { .name = "老钱 AI", .enter = menu_enter, .exit = menu_exit,
       .key = menu_key },
 };
 #define DEMO_COUNT (sizeof(DEMOS) / sizeof(DEMOS[0]))
