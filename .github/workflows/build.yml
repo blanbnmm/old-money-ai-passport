@@ -11,25 +11,20 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # 先 checkout 当前仓库（带 patches/main 目录）
       - name: Checkout this repo (with patches)
         uses: actions/checkout@v4
         with:
           path: src
 
-      # 把 sdk 目录放到 src 下，不影响 patches
       - name: Clone official AI Passport SDK into src/sdk
         run: |
           cd src
           git clone --depth 1 --recursive --shallow-submodules https://github.com/FoloToy/ai-passport.git sdk
 
-      # 应用老钱 AI 源码补丁
       - name: Apply Lao Qian AI patches
         run: |
           if [ -d src/patches/main ]; then
-            cp src/patches/main/CMakeLists.txt src/sdk/main/CMakeLists.txt
-            cp src/patches/main/main.c src/sdk/main/main.c
-            cp src/patches/main/demo.h src/sdk/main/demo.h
+            # 应用老钱 AI 源码
             cp src/patches/main/menu.h src/sdk/main/menu.h
             cp src/patches/main/menu.c src/sdk/main/menu.c
             cp src/patches/main/feature_quote.h src/sdk/main/feature_quote.h
@@ -44,10 +39,15 @@ jobs:
             cp src/patches/main/old_money_diary.c src/sdk/main/old_money_diary.c
             cp src/patches/main/stock_monitor.h src/sdk/main/stock_monitor.h
             cp src/patches/main/stock_monitor.c src/sdk/main/stock_monitor.c
-            echo "✓ 老钱 AI 14 源码已应用"
+            cp src/patches/main/CMakeLists.txt src/sdk/main/CMakeLists.txt
+            cp src/patches/main/main.c src/sdk/main/main.c
+            cp src/patches/main/demo.h src/sdk/main/demo.h
+            # 应用 sdkconfig.defaults（WiFi 占位）
+            cp src/patches/main/sdkconfig.defaults src/sdk/main/sdkconfig.defaults
+            echo "✓ 老钱 AI 14 源码 + sdkconfig 已应用"
           else
             echo "❌ src/patches/main 不存在"
-            ls -la src/ 2>&1
+            ls -la src/
             exit 1
           fi
 

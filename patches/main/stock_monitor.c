@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char *TAG = "stock_mon";
 
 typedef struct {
     const char *ticker;
