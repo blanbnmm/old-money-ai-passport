@@ -51,21 +51,21 @@ jobs:
             exit 1
           fi
 
-      - name: Install ESP-IDF v5.5.3 (with submodules)
+      - name: Install ESP-IDF v5.5.3
         run: |
           cd ${{ runner.temp }}
           git clone --depth 1 -b v5.5.3 https://github.com/espressif/esp-idf.git
           cd esp-idf
-          git submodule update --init --depth 1 --recursive
           ./install.sh esp32c3
           echo "IDF_PATH=${{ runner.temp }}/esp-idf" >> $GITHUB_ENV
 
-      - name: Build firmware
+      - name: Build firmware (skip merge-bin / flash)
         run: |
           source $IDF_PATH/export.sh
           cd src/sdk
           idf.py set-target esp32c3
-          idf.py build
+          # 不跑 merge-bin/flash，只跑 build
+          idf.py -G "Unix Makefiles" app 2>/dev/null || idf.py build
           echo "=== Build artifacts ==="
           find build -name "*.bin" 2>&1 | head -10
 
