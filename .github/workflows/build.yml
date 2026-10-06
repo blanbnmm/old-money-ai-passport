@@ -24,7 +24,6 @@ jobs:
       - name: Apply Lao Qian AI patches
         run: |
           if [ -d src/patches/main ]; then
-            # 应用老钱 AI 源码
             cp src/patches/main/menu.h src/sdk/main/menu.h
             cp src/patches/main/menu.c src/sdk/main/menu.c
             cp src/patches/main/feature_quote.h src/sdk/main/feature_quote.h
@@ -42,7 +41,6 @@ jobs:
             cp src/patches/main/CMakeLists.txt src/sdk/main/CMakeLists.txt
             cp src/patches/main/main.c src/sdk/main/main.c
             cp src/patches/main/demo.h src/sdk/main/demo.h
-            # 应用 sdkconfig.defaults（WiFi 占位）
             cp src/patches/main/sdkconfig.defaults src/sdk/main/sdkconfig.defaults
             echo "✓ 老钱 AI 14 源码 + sdkconfig 已应用"
           else
@@ -64,10 +62,20 @@ jobs:
           source $IDF_PATH/export.sh
           cd src/sdk
           idf.py set-target esp32c3
-          idf.py -B build
-          idf.py merge-bin -o build/FoloToy-AI-Passport-full.bin
-          echo "=== Build complete ==="
-          ls -lh build/FoloToy-AI-Passport-full.bin
+          idf.py build
+          # merge-bin 默认输出 build/merged-binary.bin
+          cd build
+          if [ -f merged-binary.bin ]; then
+            cp merged-binary.bin FoloToy-AI-Passport-full.bin
+            echo "✓ merge-bin 成功 (默认路径)"
+          elif [ -f FoloToy-AI-Passport-full.bin ]; then
+            echo "✓ full.bin 已存在"
+          else
+            echo "❌ 没找到 merged binary"
+            ls -lh
+            exit 1
+          fi
+          ls -lh FoloToy-AI-Passport-full.bin
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
