@@ -24,7 +24,6 @@ jobs:
       - name: Apply Lao Qian AI patches
         run: |
           if [ -d src/patches/main ]; then
-            # 老钱 AI 14 源码
             cp src/patches/main/menu.h src/sdk/main/menu.h
             cp src/patches/main/menu.c src/sdk/main/menu.c
             cp src/patches/main/feature_quote.h src/sdk/main/feature_quote.h
@@ -43,22 +42,21 @@ jobs:
             cp src/patches/main/main.c src/sdk/main/main.c
             cp src/patches/main/demo.h src/sdk/main/demo.h
             cp src/patches/main/laoqian_fonts.h src/sdk/main/laoqian_fonts.h
-            # 中文 LVGL 字体（801 字 / 16px + 20px）
             mkdir -p src/sdk/assets/fonts
             cp src/patches/assets/fonts/laoqian_font_16.c src/sdk/assets/fonts/laoqian_font_16.c
             cp src/patches/assets/fonts/laoqian_font_20.c src/sdk/assets/fonts/laoqian_font_20.c
-            echo "✓ 老钱 AI 14 源码 + 2 中文字体 + sdkconfig 已应用"
+            echo "✓ 老钱 AI 14 源码 + 2 中文字体已应用"
           else
             echo "❌ src/patches/main 不存在"
-            ls -la src/
             exit 1
           fi
 
-      - name: Install ESP-IDF v5.5.3
+      - name: Install ESP-IDF v5.5.3 (with submodules)
         run: |
           cd ${{ runner.temp }}
           git clone --depth 1 -b v5.5.3 https://github.com/espressif/esp-idf.git
           cd esp-idf
+          git submodule update --init --depth 1 --recursive
           ./install.sh esp32c3
           echo "IDF_PATH=${{ runner.temp }}/esp-idf" >> $GITHUB_ENV
 
