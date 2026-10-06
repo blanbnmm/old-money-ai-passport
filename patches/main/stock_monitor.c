@@ -246,7 +246,7 @@ void stock_monitor_enter(void) {
     lv_obj_align(s_name_lbl, LV_ALIGN_TOP_LEFT, 16, 40);
     s_code_lbl = ui_pixel_label(s_scr, "...", &lv_font_montserrat_14, 0x0872C9);
     lv_obj_align(s_code_lbl, LV_ALIGN_TOP_LEFT, 16, 70);
-    s_price_lbl = ui_pixel_label(s_scr, "--.--", &lv_font_montserrat_36, 0x17202A);
+    s_price_lbl = ui_pixel_label(s_scr, "--.--", &lv_font_montserrat_20, 0x17202A);
     lv_obj_align(s_price_lbl, LV_ALIGN_CENTER, 0, -20);
     s_change_lbl = ui_pixel_label(s_scr, "—", &lv_font_montserrat_20, 0xD9E7EC);
     lv_obj_align(s_change_lbl, LV_ALIGN_CENTER, 0, 30);
@@ -269,14 +269,14 @@ void stock_monitor_exit(void) {
 }
 
 esp_err_t stock_monitor_start(void) {
-    const char *ssid = CONFIG_STOCK_MON_WIFI_SSID;
+    const char *ssid = "iTo-Tsin"; // TODO: 用户改成自家 WiFi
     if (strlen(ssid) > 0) {
         esp_err_t err = wifi_init_if_needed();
         if (err != ESP_OK) return err;
         wifi_config_t cfg = {0};
         strncpy((char *)cfg.sta.ssid, ssid, sizeof(cfg.sta.ssid) - 1);
-        strncpy((char *)cfg.sta.password, CONFIG_STOCK_MON_WIFI_PASS,
-                sizeof(cfg.sta.password) - 1);
+        // WiFi password - 用户在源码改
+                cfg.sta.threshold.authmode = WIFI_AUTH_OPEN;
         cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
         esp_wifi_set_mode(WIFI_MODE_STA);
         esp_wifi_set_config(WIFI_IF_STA, &cfg);
