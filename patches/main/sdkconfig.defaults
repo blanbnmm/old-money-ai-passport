@@ -1,3 +1,9 @@
 # 老钱 AI 自定义：股票监控 WiFi 占位（用户自行改）
 CONFIG_STOCK_MON_WIFI_SSID="iTo-Tsin"
 CONFIG_STOCK_MON_WIFI_PASS=""
+
+# ============================================================
+# 老钱 AI 自定义：股票监控
+# ============================================================
+CONFIG_STOCK_MON_WIFI_SSID="iTo-Tsin"
+CONFIG_STOCK_MON_WIFI_PASS=""

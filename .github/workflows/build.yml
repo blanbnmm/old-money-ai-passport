@@ -41,7 +41,8 @@ jobs:
             cp src/patches/main/CMakeLists.txt src/sdk/main/CMakeLists.txt
             cp src/patches/main/main.c src/sdk/main/main.c
             cp src/patches/main/demo.h src/sdk/main/demo.h
-            cp src/patches/main/sdkconfig.defaults src/sdk/main/sdkconfig.defaults
+            # 不要追加 (替换) SDK 原 sdkconfig.defaults（会破坏 LVGL 配置导致雪花屏）
+            # 改为：保留 SDK 原文件，老钱 AI 配置只在源码里用硬编码（之前已改）
             echo "✓ 老钱 AI 14 源码 + sdkconfig 已应用"
           else
             echo "❌ src/patches/main 不存在"
