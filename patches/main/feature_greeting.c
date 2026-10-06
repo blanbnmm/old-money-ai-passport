@@ -5,6 +5,7 @@
 #include "lvgl.h"
 
 #include <stdio.h>
+#include <esp_system.h>
 #include <string.h>
 
 static lv_obj_t *s_scr;
